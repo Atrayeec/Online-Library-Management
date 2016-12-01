@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <title><%= title %></title>
+    <meta charset="utf-8"> 
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <!-- Libraries -->
+    <!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+	  <nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	       <h1><%= title %></h1>
+	    </div>
+	  </div>
+	</nav>
+   
+	<div class="container container-table">
+    <div class="row vertical-center-row">
+        <ng-view></ng-view>
+    </div>
+</div>
+    
+
+	<!-- Angular library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-resource.min.js"></script>
+
+    <!-- Template -->
+     <script type="text/ng-template" id="/signin.html">
+     <div class="login-view text-center col-md-4 col-md-offset-4">
+     <h3>Login</h3>
+     <div class="alert alert-danger hide">
+	  <strong>Invalid !</strong> Username or Password.
+	</div>
+     <div class="login-view-inner text-center">
+     <table>
+     <tr>
+     <td>Username</td>
+     <td><input type="text" ng-model="username"></td>
+     </tr>
+     <tr>
+     <td>Password</td>
+     <td><input type="text" ng-model="password"></td>
+     </tr>
+     <tr>
+     <td colspan="2"> <button  class="btn btn-info" ng-click="login()">Login</button></td>
+     </tr>
+     </table>
+     </div>
+     </div>
+    </script>
+    
+     <script type="text/ng-template" id="/transaction.html">
+      <div class="list-view text-center col-md-8 col-md-offset-2">
+     	<h3>Book List</h3>
+     	<div class="row">
+     		<div class="col-md-8">
+     		<div class="search-box">
+     	 		Search: <input type="text" ng-model="search.name">
+     	 	</div>
+     		</div>
+     		<div class="col-md-4 ">
+     		<button  onclick="$('#addModal').modal();" class="btn btn-info right">Add Book</button>
+     		</div>
+     	</div>
+     	<div class="row list-view-inner">
+     	<div class="table-responsive">
+     	<table id="booklist" class="table table-hover">
+     	<tr ng-repeat="book in books| filter: search">
+     	<td>{{book.name}}</td>
+     	<td ng-if="book.av_status == 'available'">
+     	 <button  class="btn btn-success" ng-click="edit($index,'borrow')">Borrow</button>
+     	</td>
+     	<td ng-if="book.av_status == 'unavailable'">
+     	 <button  class="btn btn-warning" ng-click="edit($index,'handover')">Return</button>
+     	</td>
+     	<td> <button class="btn btn-danger"  ng-click="remove($index)">remove</button></td>
+     	</tr>
+     	</table>
+     	</div>
+     	</div>
+     	<div id="addModal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+		    <!-- Modal content-->
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal">&times;</button>
+		        <h4 class="modal-title">Add books</h4>
+		      </div>
+		      <div class="modal-body">
+		        <table>
+			     <tr>
+			     <td>Book Name</td>
+			     <td>
+			     <input type="text" ng-model="newbk_name">
+			     </td>
+			     </tr>
+			     <tr>
+			     <td>Book Author</td>
+			     <td>
+			     <input type="text" ng-model="newbk_author">
+			     </td>
+			     </tr>
+			     </table>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default"  ng-click="add_book()">complete</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+     	<div id="borrowModal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+		    <!-- Modal content-->
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal">&times;</button>
+		        <h4 class="modal-title">Manage books</h4>
+		      </div>
+		      <div class="modal-body">
+		        <table>
+			     <tr>
+			     <td>Select User</td>
+			     <td>
+			     <select ng-model="s_user" class="selectpicker">
+			          <option ng-model="username" selected>Select User</option>
+					  <option ng-repeat="user in users" ng-model="username">
+					  {{user.username}}
+					  </option>
+				</select>
+			     </td>
+			     </tr>
+			     <tr>
+			     <td>Book</td>
+			     <td><span id="bookname" ng-model="bookname"></span></td>
+			     </tr>
+			     </table>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default"  ng-click="update($index,'borrow')">complete</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+     </script>
+     
+     <script type="text/ng-template" id="/handovertransaction.html">
+     	<h3>Handover Book</h3>
+     	
+     </script>
+
+    <script>
+      angular.module('app', ['ngRoute', 'ngResource'])
+
+        //---------------
+        // Services
+        //---------------
+
+        .factory('library_manage', ['$resource', function($resource){
+          return $resource('/todos/:id', null, {
+            'login': { method:'POST' },
+            'getuser': { method:'GET', isArray:true },
+            'add_book': { method:'POST' },
+            'update': { method:'PUT' }
+          });
+        }])
+
+        //---------------
+        // Controllers
+        //---------------
+
+        .controller('loginController', ['$scope', 'library_manage','$location', function ($scope, details,$location) {
+          
+           $scope.login = function(){
+            if(!$scope.username || !$scope.password || $scope.username.length < 1 ||  $scope.password.length < 1) return;
+            var user = new details({ username: $scope.username, password: $scope.password });
+            user.$login(function(result){
+            	if(result.text!="denied")
+            	{
+            		$location.url('/borrowtransaction');
+            	}
+            	else{
+            		$('.alert-danger').removeClass('hide');
+            	}
+            });
+          }
+        }])
+        
+         .controller('transactionController', ['$scope','$route', '$routeParams', 'library_manage', '$location', function ($scope,$route, $routeParams, details, $location) {
+          $scope.books = details.query();
+           $scope.users = details.getuser({id : 1});
+           
+          
+           $scope.add_book = function(){
+            var data = new details({ bookname: $scope.newbk_name, authorname:$scope.newbk_author});
+		    data.$add_book({id: 0},function(result){
+            $('#addmodal').modal('hide');
+            $('.modal-backdrop').remove();
+		    $route.reload();
+		    });
+           }
+           
+           $scope.edit = function(index,status){
+           if(status=='borrow'){
+           var t = document.getElementById('booklist');
+           var name = $(t.rows[index].cells[0]).text(); 
+           $('#bookname').text(name);
+           $('#borrowModal').modal();
+           }
+           else{
+           	 $scope.update(index,'handover');
+           }
+           }
+           
+          $scope.update = function(index,status){
+          	if(status=='borrow'){
+		    var data = new details({ username: $scope.s_user, bookname:  $('#bookname').text() , status: status});
+		    data.$update({id: index},function(result){
+            $('#borrowModal').modal('hide');
+            $('.modal-backdrop').remove();
+		    $route.reload();
+		    });
+		    }else{
+           var t = document.getElementById('booklist');
+		    var book=$(t.rows[index].cells[0]).text(); 
+		    var data = new details({bookname:  book ,status: status});
+		    data.$update({id: index},function(result){
+		    $route.reload();
+		    });
+		    }
+		  }
+          
+           $scope.remove = function(index){
+            var book = $scope.books[index];
+            var r = confirm("Are You really want to delete This Book ?");
+			if (r == true) {
+            details.remove({id: book._id}, function(){
+              $scope.books.splice(index, 1);
+            });
+			} 
+          }
+        }])
+
+       
+
+        //---------------
+        // Routes
+        //---------------
+
+        .config(['$routeProvider', function ($routeProvider) {
+          $routeProvider
+            .when('/', {
+              templateUrl: '/signin.html',
+              controller: 'loginController'
+            })
+            .when('/borrowtransaction', {
+              templateUrl: '/transaction.html',
+              controller: 'transactionController'
+            })
+        }]);
+    </script>
+  </body>
+</html>
